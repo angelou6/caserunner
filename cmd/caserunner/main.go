@@ -10,7 +10,7 @@ import (
 func main() {
 	input := `
 exec: python $code
-time-limit: 22ms
+time-limit: 3ms
 
 --
 input:
@@ -29,7 +29,9 @@ output:
 --
 `
 	testfile := parser.New()
-	err := testfile.ParseFile(input, "internal/runner/tests/fizzbuzz.py")
+	// err := testfile.ParseFile(input, "internal/runner/tests/fizzbuzz.py")
+	err := testfile.ParseFile(input, "internal/runner/tests/fizzbuzzwrong.py")
+	// err := testfile.ParseFile(input, "internal/runner/tests/crashbuzz.py")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

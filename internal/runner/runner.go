@@ -58,13 +58,13 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 		select {
 		case response, ok := <-lines:
 			if !ok {
-				return []string{}, fmt.Errorf("stdout closed unexpectedly\nstderr: %s", stderrBuf.String())
+				return []string{}, fmt.Errorf("stdout se cerro inesperadamente.\nstderr: %s", stderrBuf.String())
 			}
 			elapsed := time.Since(start)
 			if timeLimit == -1 || elapsed <= timeLimit {
 				output = append(output, response)
 			} else {
-				return []string{}, errors.New("timeout exceeded")
+				return []string{}, errors.New("Tiempo excedido.")
 			}
 		case err := <-done:
 			return []string{}, err
@@ -82,11 +82,15 @@ func RunFile(testcases parser.TestFile) {
 		if err != nil {
 			// TODO: halt flag to stop execution on error
 			// alse verbose flag for verbose output
-			colors.Println(fmt.Sprintf("Test %d:", i), colors.Blue)
-			colors.Print("Error: ", colors.Red)
+			colors.Println(fmt.Sprintf("Error en el caso de prueba %d:", i+1), colors.Red)
 			fmt.Println(err)
 			continue
 		}
-		fmt.Println(res)
+
+		result := test.JudgeOutput(res)
+		if !result {
+			colors.Println(fmt.Sprintf("Caso %d incorrecto", i+1), colors.Yellow)
+			fmt.Printf("Se esperaba %q, se obtuvo %q\n", test.Output, res)
+		}
 	}
 }

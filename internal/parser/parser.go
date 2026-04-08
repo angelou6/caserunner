@@ -15,21 +15,6 @@ const (
 	Output direction = "output"
 )
 
-type TestCase struct {
-	Input  []string
-	Output []string
-}
-
-type TestFile struct {
-	Exec      string
-	TimeLimit time.Duration
-	Tests     []TestCase
-}
-
-func New() *TestFile {
-	return &TestFile{}
-}
-
 func matchFirstRegex(input string, regex string) (string, error) {
 	timeR := regexp.MustCompile(regex)
 	matches := timeR.FindAllStringSubmatch(input, -1)
