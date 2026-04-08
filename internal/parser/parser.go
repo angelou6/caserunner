@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"caserunner/internal/colors"
 	"errors"
 	"fmt"
 	"regexp"
@@ -62,7 +63,7 @@ func appendToCase(indexes []int, tcinput []string, into direction) []string {
 
 func parseTest(input string) (TestCase, error) {
 	if len(input) == 0 {
-		return TestCase{}, errors.New("Caso de prueba esta vacío.")
+		return TestCase{}, errors.New("Caso de prueba vacío.")
 	}
 
 	tcinput := strings.Split(input, "\n")
@@ -102,10 +103,11 @@ func (t *TestFile) ParseFile(input string, program string) error {
 	re := regexp.MustCompile(`(?sm)^--\n(.*?)^--`)
 	matches := re.FindAllStringSubmatch(input, -1)
 
-	for _, match := range matches {
+	for i, match := range matches {
 		body := strings.TrimSpace(match[1])
 		tc, err := parseTest(body)
 		if err != nil {
+			colors.Println(fmt.Sprintf("Error parseando la prueba %d:", i+1), colors.Red)
 			return err
 		}
 		t.Tests = append(t.Tests, tc)
