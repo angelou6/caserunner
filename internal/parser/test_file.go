@@ -21,5 +21,11 @@ func New() *TestFile {
 }
 
 func (t *TestCase) JudgeOutput(output []string) bool {
-	return reflect.DeepEqual(t.Output, output)
+	expected := []string{}
+	for _, o := range t.Output {
+		if o != "" {
+			expected = append(expected, o)
+		}
+	}
+	return reflect.DeepEqual(expected, output)
 }

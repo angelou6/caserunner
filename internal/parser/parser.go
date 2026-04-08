@@ -61,10 +61,7 @@ func appendToCase(indexes []int, tcinput []string, into direction) []string {
 }
 
 func parseTest(input string) (TestCase, error) {
-	// This function fucking sucks
-	// Everything arround this function fucking sucks
 	if len(input) == 0 {
-		// TODO: better error message with line numbers and shit
 		return TestCase{}, errors.New("Caso de prueba esta vacío.")
 	}
 
@@ -72,7 +69,6 @@ func parseTest(input string) (TestCase, error) {
 	inputIndexes := getIndexes("input:", tcinput)
 	outputIndexes := getIndexes("output:", tcinput)
 
-	// TODO: better error messages with line numbers and shit
 	if len(inputIndexes) > 1 || len(outputIndexes) > 1 {
 		return TestCase{}, errors.New("Multiples indexes o outputs encontrados.")
 	} else if len(inputIndexes) == 0 || len(outputIndexes) == 0 {

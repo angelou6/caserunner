@@ -3,38 +3,30 @@ package main
 import (
 	"caserunner/internal/parser"
 	"caserunner/internal/runner"
+	"flag"
 	"fmt"
 	"os"
 )
 
 func main() {
-	input := `
-exec: python $code
-time-limit: 3ms
+	verbose := flag.Bool("verbose", false, "Salida detallada")
+	halt := flag.Bool("halt", false, "El programa se detiene cuando encuentra un error")
+	flag.Parse()
 
---
-input:
-3
+	code := os.Args[len(os.Args)-1]
+	testfile := os.Args[len(os.Args)-2]
 
-output:
-Fizz
---
+	data, err := os.ReadFile(testfile)
+	if err != nil {
+		fmt.Println("Error leyendo archivo:", err)
+		return
+	}
 
---
-input:
-1
-
-output:
-1
---
-`
-	testfile := parser.New()
-	// err := testfile.ParseFile(input, "internal/runner/tests/fizzbuzz.py")
-	err := testfile.ParseFile(input, "internal/runner/tests/fizzbuzzwrong.py")
-	// err := testfile.ParseFile(input, "internal/runner/tests/crashbuzz.py")
+	par := parser.New()
+	err = par.ParseFile(string(data), code)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	runner.RunFile(*testfile)
+	runner.RunFile(par, *verbose, *halt)
 }

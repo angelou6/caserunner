@@ -51,9 +51,13 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 	}()
 
 	output := []string{}
-	for _, input := range t.Input {
+	for i, input := range t.Input {
 		start := time.Now()
 		fmt.Fprintln(stdin, input)
+
+		if i < len(t.Output) && t.Output[i] == "" {
+			continue
+		}
 
 		select {
 		case response, ok := <-lines:
@@ -62,7 +66,7 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 			}
 			elapsed := time.Since(start)
 			if timeLimit == -1 || elapsed <= timeLimit {
-				output = append(output, response)
+				output = append(output, strings.TrimRight(response, " "))
 			} else {
 				return []string{}, errors.New("Tiempo excedido.")
 			}
@@ -76,21 +80,35 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 	return output, nil
 }
 
-func RunFile(testcases parser.TestFile) {
+func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 	for i, test := range testcases.Tests {
+		colors.Println(fmt.Sprintf("Prueba %d", i+1), colors.Blue)
 		res, err := runTest(test, testcases.Exec, testcases.TimeLimit)
 		if err != nil {
-			// TODO: halt flag to stop execution on error
-			// alse verbose flag for verbose output
-			colors.Println(fmt.Sprintf("Error en el caso de prueba %d:", i+1), colors.Red)
+			colors.Println("Error: ", colors.Red)
 			fmt.Println(err)
-			continue
+			if halt {
+				break
+			} else {
+				continue
+			}
 		}
 
 		result := test.JudgeOutput(res)
 		if !result {
-			colors.Println(fmt.Sprintf("Caso %d incorrecto", i+1), colors.Yellow)
-			fmt.Printf("Se esperaba %q, se obtuvo %q\n", test.Output, res)
+			colors.Println("Incorrecto", colors.Yellow)
+			expected := []string{}
+			for _, o := range test.Output {
+				if o != "" {
+					expected = append(expected, o)
+				}
+			}
+			fmt.Printf("Se esperaba %q, se obtuvo %q\n", expected, res)
+			continue
+		}
+		colors.Println("Correcto", colors.Green)
+		if verbose {
+			fmt.Printf("Prueba, %q, output: %q\n", test, res)
 		}
 	}
 }
