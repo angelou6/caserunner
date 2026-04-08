@@ -16,8 +16,8 @@ const (
 )
 
 type TestCase struct {
-	input  []string
-	output []string
+	Input  []string
+	Output []string
 }
 
 type TestFile struct {
@@ -35,7 +35,7 @@ func matchFirstRegex(input string, regex string) (string, error) {
 	matches := timeR.FindAllStringSubmatch(input, -1)
 
 	if len(matches) == 0 || len(matches[0]) < 2 {
-		return "", fmt.Errorf("no match found for pattern %q in input", regex)
+		return "", fmt.Errorf("Patron %q no encontrado en input", regex)
 	}
 
 	return strings.TrimSpace(matches[0][1]), nil
@@ -75,12 +75,12 @@ func appendToCase(indexes []int, tcinput []string, into direction) []string {
 	return res
 }
 
-// This function fucking sucks
-// Everything arround this function fucking sucks
 func parseTest(input string) (TestCase, error) {
+	// This function fucking sucks
+	// Everything arround this function fucking sucks
 	if len(input) == 0 {
 		// TODO: better error message with line numbers and shit
-		return TestCase{}, errors.New("Test case is empty.")
+		return TestCase{}, errors.New("Caso de prueba esta vacío.")
 	}
 
 	tcinput := strings.Split(input, "\n")
@@ -89,24 +89,24 @@ func parseTest(input string) (TestCase, error) {
 
 	// TODO: better error messages with line numbers and shit
 	if len(inputIndexes) > 1 || len(outputIndexes) > 1 {
-		return TestCase{}, errors.New("Multiple indexes or outputs found")
+		return TestCase{}, errors.New("Multiples indexes o outputs encontrados.")
 	} else if len(inputIndexes) == 0 || len(outputIndexes) == 0 {
-		return TestCase{}, errors.New("Input or output not found")
+		return TestCase{}, errors.New("Input o output no encontrados.")
 	}
 
 	tc := TestCase{}
 
-	tc.input = appendToCase(inputIndexes, tcinput, "input")
-	tc.output = appendToCase(outputIndexes, tcinput, "output")
+	tc.Input = appendToCase(inputIndexes, tcinput, "input")
+	tc.Output = appendToCase(outputIndexes, tcinput, "output")
 
 	return tc, nil
 }
 
-func (t *TestFile) ParseFile(program string, input string) error {
+func (t *TestFile) ParseFile(input string, program string) error {
 	// Get exec
 	exline, err := matchFirstRegex(input, "exec:(.*)")
 	if err != nil {
-		return errors.New("Exec field not found.")
+		return errors.New("Exec no encotrado.")
 	}
 	t.Exec = strings.ReplaceAll(exline, "$code", program)
 

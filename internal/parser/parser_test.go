@@ -26,11 +26,11 @@ FizzBuzz
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
-	if !slices.Equal(expectedInput, cases.input) {
-		t.Errorf("Inputs are different, Got: %v, expected %v", cases.input, expectedInput)
+	if !slices.Equal(expectedInput, cases.Input) {
+		t.Errorf("Inputs are different, Got: %v, expected %v", cases.Input, expectedInput)
 	}
-	if !slices.Equal(expectedOutput, cases.output) {
-		t.Errorf("Outputs are different, Got: %v, expected %v", cases.output, expectedOutput)
+	if !slices.Equal(expectedOutput, cases.Output) {
+		t.Errorf("Outputs are different, Got: %v, expected %v", cases.Output, expectedOutput)
 	}
 }
 
@@ -50,11 +50,11 @@ input:
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
-	if !slices.Equal(expectedInput, cases.input) {
-		t.Errorf("Inputs are different, Got: %v, expected %v", cases.input, expectedInput)
+	if !slices.Equal(expectedInput, cases.Input) {
+		t.Errorf("Inputs are different, Got: %v, expected %v", cases.Input, expectedInput)
 	}
-	if !slices.Equal(expectedOutput, cases.output) {
-		t.Errorf("Outputs are different, Got: %v, expected %v", cases.output, expectedOutput)
+	if !slices.Equal(expectedOutput, cases.Output) {
+		t.Errorf("Outputs are different, Got: %v, expected %v", cases.Output, expectedOutput)
 	}
 }
 
@@ -80,11 +80,11 @@ output:
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
-	if !slices.Equal(expectedInput, cases.input) {
-		t.Errorf("Inputs are different, Got: %v, expected %v", cases.input, expectedInput)
+	if !slices.Equal(expectedInput, cases.Input) {
+		t.Errorf("Inputs are different, Got: %v, expected %v", cases.Input, expectedInput)
 	}
-	if !slices.Equal(expectedOutput, cases.output) {
-		t.Errorf("Outputs are different, Got: %v, expected %v", cases.output, expectedOutput)
+	if !slices.Equal(expectedOutput, cases.Output) {
+		t.Errorf("Outputs are different, Got: %v, expected %v", cases.Output, expectedOutput)
 	}
 }
 
@@ -170,7 +170,7 @@ Fizz
 	`
 
 	testFile := New()
-	error := testFile.ParseFile("main.py", input)
+	error := testFile.ParseFile(input, "main.py")
 
 	if error != nil {
 		t.Errorf("Got error: %v", error)
@@ -182,6 +182,37 @@ Fizz
 
 	if testFile.TimeLimit != 3_000_000 {
 		t.Errorf("Wrong time limit. Expected '3,000,000 nanosecons', got %d", testFile.TimeLimit)
+	}
+}
+
+func TestMultipleTests(t *testing.T) {
+	input := `
+exec: python $code
+time-limit: 3ms
+--
+input:
+3
+output:
+Fizz
+--
+
+--
+input:
+1
+output:
+1
+--
+	`
+
+	testFile := New()
+	error := testFile.ParseFile(input, "main.py")
+
+	if error != nil {
+		t.Errorf("Got error: %v", error)
+	}
+
+	if len(testFile.Tests) != 2 {
+		t.FailNow()
 	}
 }
 
@@ -197,7 +228,7 @@ Fizz
 	`
 
 	testFile := New()
-	error := testFile.ParseFile("main.py", missingTime)
+	error := testFile.ParseFile(missingTime, "main.py")
 
 	if error != nil {
 		t.Errorf("Got error: %v", error)
@@ -217,7 +248,7 @@ Fizz
 	`
 
 	testFile = New()
-	error = testFile.ParseFile("main.py", missingCode)
+	error = testFile.ParseFile(missingCode, "main.py")
 
 	if error == nil {
 		t.Error("Exec missing uncaught")
@@ -233,7 +264,7 @@ Fizz
 	`
 
 	testFile = New()
-	error = testFile.ParseFile("main.py", emptyCode)
+	error = testFile.ParseFile(emptyCode, "main.py")
 
 	if error == nil {
 		t.Error("Exec empty uncaught")
@@ -242,7 +273,7 @@ Fizz
 
 func TestEmptyFile(t *testing.T) {
 	testFile := New()
-	error := testFile.ParseFile("main.py", "")
+	error := testFile.ParseFile("", "main.py")
 
 	if error == nil {
 		t.FailNow()
