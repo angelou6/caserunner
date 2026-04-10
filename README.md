@@ -50,7 +50,7 @@ time-limit: 1s
 | `exec:` | Sí | Comando para ejecutar el programa. `$code` se reemplaza con la ruta al archivo de código. |
 | `time-limit:` | No | Tiempo máximo de respuesta por línea de output. Acepta unidades como `1s`, `500ms`, `3ms`. Si se omite, no hay límite. |
 
-El texto fuera de los bloques de prueba se ignora, por lo que puedes usarlo como comentarios (por ejemplo, para anotar el link del problema original).
+El texto fuera de los bloques de prueba se ignora, por lo que puedes usarlo como comentarios.
 
 ### Casos de prueba
 
