@@ -13,13 +13,18 @@ func main() {
 	halt := flag.Bool("halt", false, "El programa se detiene cuando encuentra un error")
 	flag.Parse()
 
+	if len(os.Args) < 3 {
+		fmt.Println("Argumento faltante.")
+		os.Exit(1)
+	}
+
 	code := os.Args[len(os.Args)-1]
 	testfile := os.Args[len(os.Args)-2]
 
 	data, err := os.ReadFile(testfile)
 	if err != nil {
 		fmt.Println("Error leyendo archivo:", err)
-		return
+		os.Exit(1)
 	}
 
 	par := parser.New()

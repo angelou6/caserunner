@@ -87,11 +87,11 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 		if err != nil {
 			colors.Println("Error: ", colors.Red)
 			fmt.Println(err)
+
 			if halt {
 				break
-			} else {
-				continue
 			}
+			continue
 		}
 
 		result := test.JudgeOutput(res)
@@ -104,11 +104,14 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 				}
 			}
 			fmt.Printf("Se esperaba %q, se obtuvo %q\n", expected, res)
-			continue
-		}
-		colors.Println("Correcto", colors.Green)
-		if verbose {
-			fmt.Printf("Prueba, %q, output: %q\n", test, res)
+			if halt {
+				break
+			}
+		} else {
+			colors.Println("Correcto", colors.Green)
+			if verbose {
+				fmt.Printf("Prueba, %q, output: %q\n", test, res)
+			}
 		}
 	}
 }

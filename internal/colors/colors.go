@@ -26,3 +26,7 @@ func Print(input string, color Color) {
 func Println(input string, color Color) {
 	Print(input+"\n", color)
 }
+
+func Colorize(input string, color Color) string {
+	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", color, input)
+}

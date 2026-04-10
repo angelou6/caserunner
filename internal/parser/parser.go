@@ -107,8 +107,11 @@ func (t *TestFile) ParseFile(input string, program string) error {
 		body := strings.TrimSpace(match[1])
 		tc, err := parseTest(body)
 		if err != nil {
-			colors.Println(fmt.Sprintf("Error parseando la prueba %d:", i+1), colors.Red)
-			return err
+			return fmt.Errorf(
+				"%s: \n%v",
+				colors.Colorize(fmt.Sprintf("Error parseando la prueba %d:", i+1), colors.Red),
+				err,
+			)
 		}
 		t.Tests = append(t.Tests, tc)
 	}
