@@ -110,7 +110,7 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 		} else {
 			colors.Println("Correcto", colors.Green)
 			if verbose {
-				fmt.Printf("Prueba, %q, output: %q\n", test, res)
+				fmt.Printf("Input: %q, output: %q\n", test, res)
 			}
 		}
 	}

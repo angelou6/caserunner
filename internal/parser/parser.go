@@ -9,13 +9,6 @@ import (
 	"time"
 )
 
-type direction string
-
-const (
-	Input  direction = "input"
-	Output direction = "output"
-)
-
 func matchFirstRegex(input string, regex string) (string, error) {
 	timeR := regexp.MustCompile(regex)
 	matches := timeR.FindAllStringSubmatch(input, -1)
@@ -27,61 +20,46 @@ func matchFirstRegex(input string, regex string) (string, error) {
 	return strings.TrimSpace(matches[0][1]), nil
 }
 
-func getIndexes(str string, arr []string) []int {
+func getIndexes(to direction, arr []string) (int, error) {
 	foundIndexes := []int{}
 	for i, s := range arr {
-		if str == s {
+		if s == string(to) {
 			foundIndexes = append(foundIndexes, i)
 		}
 	}
-	return foundIndexes
+
+	if len(foundIndexes) > 1 {
+		return 0, fmt.Errorf("Multiples '%s' encontrados", to)
+	}
+	if len(foundIndexes) == 0 {
+		return 0, fmt.Errorf("'%s' no encontrado", to)
+	}
+	return foundIndexes[0], nil
 }
 
-func appendToCase(indexes []int, tcinput []string, into direction) []string {
-	res := []string{}
-
-	otherInto := ""
-	if into == "input" {
-		otherInto = "output:"
-	} else {
-		otherInto = "input:"
-	}
-
-	for i := indexes[0]; i < len(tcinput); i++ {
-		if len(tcinput[i]) == 0 || tcinput[i] == string(into)+":" {
-			continue
-		} else if tcinput[i] == otherInto {
-			break
-		}
-
-		s := strings.TrimSpace(tcinput[i])
-		s = strings.Replace(s, "\\", "", 1)
-		res = append(res, s)
-	}
-	return res
-}
-
-func parseTest(input string) (TestCase, error) {
+func (t *TestFile) parseTest(input string) error {
 	if len(input) == 0 {
-		return TestCase{}, errors.New("Caso de prueba vacío.")
+		return errors.New("Caso de prueba vacío.")
 	}
 
-	tcinput := strings.Split(input, "\n")
-	inputIndexes := getIndexes("input:", tcinput)
-	outputIndexes := getIndexes("output:", tcinput)
+	caseInputs := strings.Split(input, "\n")
 
-	if len(inputIndexes) > 1 || len(outputIndexes) > 1 {
-		return TestCase{}, errors.New("Multiples indexes o outputs encontrados.")
-	} else if len(inputIndexes) == 0 || len(outputIndexes) == 0 {
-		return TestCase{}, errors.New("Input o output no encontrados.")
+	inputIdx, err := getIndexes(Input, caseInputs)
+	if err != nil {
+		return err
+	}
+
+	outputIdx, err := getIndexes(Output, caseInputs)
+	if err != nil {
+		return err
 	}
 
 	tc := TestCase{}
+	tc.AppendToCase(inputIdx, caseInputs, Input)
+	tc.AppendToCase(outputIdx, caseInputs, Output)
 
-	tc.Input = appendToCase(inputIndexes, tcinput, "input")
-	tc.Output = appendToCase(outputIndexes, tcinput, "output")
-
-	return tc, nil
+	t.Tests = append(t.Tests, tc)
+	return nil
 }
 
 func (t *TestFile) ParseFile(input string, program string) error {
@@ -105,7 +83,7 @@ func (t *TestFile) ParseFile(input string, program string) error {
 
 	for i, match := range matches {
 		body := strings.TrimSpace(match[1])
-		tc, err := parseTest(body)
+		err := t.parseTest(body)
 		if err != nil {
 			return fmt.Errorf(
 				"%s: \n%v",
@@ -113,7 +91,6 @@ func (t *TestFile) ParseFile(input string, program string) error {
 				err,
 			)
 		}
-		t.Tests = append(t.Tests, tc)
 	}
 
 	return nil

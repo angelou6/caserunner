@@ -5,9 +5,18 @@ import (
 	"testing"
 )
 
+func parseTestHelper(input string) (TestCase, error) {
+	tf := New()
+	err := tf.parseTest(input)
+	if err != nil {
+		return TestCase{}, err
+	}
+	return tf.Tests[0], nil
+}
+
 func TestTestCase(t *testing.T) {
-	input :=
-		`input:
+	input := `
+input:
 3
 3
 5
@@ -22,7 +31,7 @@ FizzBuzz
 	expectedInput := []string{"3", "3", "5", "15"}
 	expectedOutput := []string{"Fizz", "Buzz", "FizzBuzz"}
 
-	cases, err := parseTest(input)
+	cases, err := parseTestHelper(input)
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
@@ -46,7 +55,7 @@ input:
 	expectedInput := []string{"3"}
 	expectedOutput := []string{"Fizz"}
 
-	cases, err := parseTest(input)
+	cases, err := parseTestHelper(input)
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
@@ -59,7 +68,7 @@ input:
 }
 
 func TestEmpty(t *testing.T) {
-	_, error := parseTest("")
+	_, error := parseTestHelper("")
 	if error == nil {
 		t.FailNow()
 	}
@@ -76,7 +85,7 @@ output:
 	expectedInput := []string{"3"}
 	expectedOutput := []string{"output: Fizz"}
 
-	cases, err := parseTest(input)
+	cases, err := parseTestHelper(input)
 	if err != nil {
 		t.Errorf("Got error: %v", err)
 	}
@@ -96,7 +105,7 @@ break_here:
 output:
 Fizz
 	`
-	_, error := parseTest(input)
+	_, error := parseTestHelper(input)
 	if error == nil {
 		t.FailNow()
 	}
@@ -113,7 +122,7 @@ input:
 output:
 Fizz
 	`
-	_, error := parseTest(duplicatedInput)
+	_, error := parseTestHelper(duplicatedInput)
 	if error == nil {
 		t.Error("Duplicated input uncaught")
 	}
@@ -129,7 +138,7 @@ output:
 Fizz
 	`
 
-	_, error = parseTest(duplicatedOutput)
+	_, error = parseTestHelper(duplicatedOutput)
 	if error == nil {
 		t.Error("Duplicated output uncaught")
 	}
@@ -140,7 +149,7 @@ func TestMissingToken(t *testing.T) {
 input:
 3
 	`
-	_, error := parseTest(missingOutput)
+	_, error := parseTestHelper(missingOutput)
 	if error == nil {
 		t.Error("Missing output not cought")
 	}
@@ -150,7 +159,7 @@ output:
 Fizz
 	`
 
-	_, error = parseTest(missingInput)
+	_, error = parseTestHelper(missingInput)
 	if error == nil {
 		t.Error("Missing input uncaught")
 	}
