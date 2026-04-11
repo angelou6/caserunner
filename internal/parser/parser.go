@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func matchFirstRegex(input string, regex string) (string, error) {
+func matchFirstRegex(input, regex string) (string, error) {
 	timeR := regexp.MustCompile(regex)
 	matches := timeR.FindAllStringSubmatch(input, -1)
 
@@ -62,22 +62,22 @@ func (t *TestFile) parseTest(input string) error {
 	return nil
 }
 
-func (t *TestFile) ParseFile(input string, program string) error {
-	// Get exec
+func (t *TestFile) ParseFile(input, program string) error {
+	// obtener exec
 	exline, err := matchFirstRegex(input, "exec:(.*)")
 	if err != nil {
 		return errors.New("Exec no encotrado.")
 	}
 	t.Exec = strings.ReplaceAll(exline, "$code", program)
 
-	// Get time limit
+	// obtener limite de tiempo
 	timeline, err := matchFirstRegex(input, "time-limit:(.*)")
 	t.TimeLimit, err = time.ParseDuration(timeline)
 	if err != nil {
 		t.TimeLimit = -1
 	}
 
-	// Parse test cases
+	// Parsear test cases
 	re := regexp.MustCompile(`(?sm)^--\n(.*?)^--`)
 	matches := re.FindAllStringSubmatch(input, -1)
 

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]string, error) {
+func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]string, time.Duration, error) {
 	args := strings.Split(command, " ")
 	cmd := exec.Command(args[0], args[1:]...)
 
@@ -20,12 +20,13 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 	stdout, _ := cmd.StdoutPipe()
 	stderr, _ := cmd.StderrPipe()
 
+	testStart := time.Now()
 	cmd.Start()
 
 	lines := make(chan string)
 	done := make(chan error, 1)
 
-	// Read the stderr
+	// Leer el stderr
 	var stderrBuf bytes.Buffer
 	go func() {
 		scanner := bufio.NewScanner(stderr)
@@ -34,8 +35,8 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 		}
 	}()
 
-	// Read the stdout
-	// If the program ends with error we send what is recorded in stderr
+	// Leer el stdout
+	// Si el programa termina con error, enviamos lo que se registró en stderr
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
@@ -65,31 +66,55 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 				stderrLine := stderrBuf.String()
 
 				if len(stderrLine) > 0 {
-					return []string{}, errors.New(stderrLine)
+					return []string{}, 0, errors.New(stderrLine)
 				}
-				return []string{}, errors.New("stdout se cerro inesperadamente.")
+				return []string{}, 0, errors.New("stdout se cerro inesperadamente.")
 			}
 			elapsed := time.Since(start)
 			if timeLimit == -1 || elapsed <= timeLimit {
 				output = append(output, strings.TrimRight(response, " "))
 			} else {
-				return []string{}, errors.New("Tiempo excedido.")
+				return []string{}, 0, errors.New("Tiempo excedido.")
 			}
 		case err := <-done:
-			return []string{}, err
+			return []string{}, 0, err
 		}
 	}
 
 	stdin.Close()
 	<-done
-	return output, nil
+	return output, time.Since(testStart), nil
 }
 
-func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
+func printResult(caseCount, correct, incorrect, failure int, totalCaseTime time.Duration) {
+	plural := func(n int, singular string) string {
+		if n == 1 {
+			return singular
+		}
+		return singular + "s"
+	}
+
+	if caseCount > 0 {
+		avg := totalCaseTime / time.Duration(caseCount)
+		fmt.Printf("Tiempo total: %s, promedio por caso: %s\n", totalCaseTime, avg)
+	} else {
+		fmt.Printf("Tiempo total: %s\n", totalCaseTime)
+	}
+
+	fmt.Printf("%d %s, %d %s, %d %s\n",
+		correct, colors.Colorize(plural(correct, "correcta"), colors.Green),
+		incorrect, colors.Colorize(plural(incorrect, "incorrecta"), colors.Yellow),
+		failure, colors.Colorize(plural(failure, "fallo"), colors.Red),
+	)
+}
+
+func RunFile(testcases *parser.TestFile, verbose, halt bool) {
 	var correct, incorrect, failure int
+	var totalCaseTime time.Duration
+	var caseCount int
 
 	for i, test := range testcases.Tests {
-		res, err := runTest(test, testcases.Exec, testcases.TimeLimit)
+		res, elapsed, err := runTest(test, testcases.Exec, testcases.TimeLimit)
 		if err != nil {
 			failure++
 
@@ -102,11 +127,17 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 			continue
 		}
 
+		totalCaseTime += elapsed
+		caseCount++
+
 		result := test.JudgeOutput(res)
 		if !result {
 			incorrect++
 
 			colors.Printf(colors.Yellow, "Problema %d incorrecto\n", i+1)
+			if verbose {
+				fmt.Printf("Tiempo: %s\n", elapsed)
+			}
 			expected := []string{}
 			for _, o := range test.Output {
 				if o != "" {
@@ -121,29 +152,10 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 			correct++
 			if verbose {
 				colors.Printf(colors.Green, "Problema %d correcto\n", i+1)
-				fmt.Printf("Input: %q, output: %q\n\n", test, res)
+				fmt.Printf("Tiempo: %s, input: %q, output: %q\n\n", elapsed, test, res)
 			}
 		}
 	}
 
-	correctaStr := "correctas"
-	if correct == 1 {
-		correctaStr = "correcta"
-	}
-	incorrectaStr := "incorrectas"
-	if incorrect == 1 {
-		incorrectaStr = "incorrecta"
-	}
-	falloStr := "fallos"
-	if failure == 1 {
-		falloStr = "fallo"
-	}
-	fmt.Printf("%d %s, %d %s, %d %s\n",
-		correct,
-		colors.Colorize(correctaStr, colors.Green),
-		incorrect,
-		colors.Colorize(incorrectaStr, colors.Yellow),
-		failure,
-		colors.Colorize(falloStr, colors.Red),
-	)
+	printResult(caseCount, correct, incorrect, failure, totalCaseTime)
 }

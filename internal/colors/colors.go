@@ -18,7 +18,7 @@ const (
 	White   Color = "37"
 )
 
-func RGB(red int, green int, blue int) Color {
+func RGB(red, green, blue int) Color {
 	return Color(fmt.Sprintf("38;2;%d;%d;%d", red, green, blue))
 }
 
