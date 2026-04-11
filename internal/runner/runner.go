@@ -81,10 +81,15 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 }
 
 func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
+	var correct, incorrect, failure int
+
 	for i, test := range testcases.Tests {
-		colors.Println(fmt.Sprintf("Prueba %d", i+1), colors.Blue)
+		fmt.Printf("Prueba %d\n", i+1)
+
 		res, err := runTest(test, testcases.Exec, testcases.TimeLimit)
 		if err != nil {
+			failure++
+
 			colors.Println("Error: ", colors.Red)
 			fmt.Println(err)
 
@@ -96,6 +101,8 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 
 		result := test.JudgeOutput(res)
 		if !result {
+			incorrect++
+
 			colors.Println("Incorrecto", colors.Yellow)
 			expected := []string{}
 			for _, o := range test.Output {
@@ -108,10 +115,13 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 				break
 			}
 		} else {
-			colors.Println("Correcto", colors.Green)
+			correct++
 			if verbose {
+				colors.Println("Correcto", colors.Green)
 				fmt.Printf("Input: %q, output: %q\n", test, res)
 			}
 		}
 	}
+
+	fmt.Printf("\n%d Correctas, %d incorrectas, %d fallos\n", correct, incorrect, failure)
 }
