@@ -62,7 +62,12 @@ func runTest(t parser.TestCase, command string, timeLimit time.Duration) ([]stri
 		select {
 		case response, ok := <-lines:
 			if !ok {
-				return []string{}, fmt.Errorf("stdout se cerro inesperadamente.\nstderr: %s", stderrBuf.String())
+				stderrLine := stderrBuf.String()
+
+				if len(stderrLine) > 0 {
+					return []string{}, errors.New(stderrLine)
+				}
+				return []string{}, errors.New("stdout se cerro inesperadamente.")
 			}
 			elapsed := time.Since(start)
 			if timeLimit == -1 || elapsed <= timeLimit {
@@ -84,14 +89,12 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 	var correct, incorrect, failure int
 
 	for i, test := range testcases.Tests {
-		fmt.Printf("Prueba %d\n", i+1)
-
 		res, err := runTest(test, testcases.Exec, testcases.TimeLimit)
 		if err != nil {
 			failure++
 
-			colors.Println("Error: ", colors.Red)
-			fmt.Println(err)
+			colors.Printf(colors.Red, "Error en problema %d:\n", i+1)
+			fmt.Printf("%v\n\n", err)
 
 			if halt {
 				break
@@ -103,25 +106,44 @@ func RunFile(testcases *parser.TestFile, verbose bool, halt bool) {
 		if !result {
 			incorrect++
 
-			colors.Println("Incorrecto", colors.Yellow)
+			colors.Printf(colors.Yellow, "Problema %d incorrecto\n", i+1)
 			expected := []string{}
 			for _, o := range test.Output {
 				if o != "" {
 					expected = append(expected, o)
 				}
 			}
-			fmt.Printf("Se esperaba %q, se obtuvo %q\n", expected, res)
+			fmt.Printf("Se esperaba %q, se obtuvo %q\n\n", expected, res)
 			if halt {
 				break
 			}
 		} else {
 			correct++
 			if verbose {
-				colors.Println("Correcto", colors.Green)
-				fmt.Printf("Input: %q, output: %q\n", test, res)
+				colors.Printf(colors.Green, "Problema %d correcto\n", i+1)
+				fmt.Printf("Input: %q, output: %q\n\n", test, res)
 			}
 		}
 	}
 
-	fmt.Printf("\n%d Correctas, %d incorrectas, %d fallos\n", correct, incorrect, failure)
+	correctaStr := "correctas"
+	if correct == 1 {
+		correctaStr = "correcta"
+	}
+	incorrectaStr := "incorrectas"
+	if incorrect == 1 {
+		incorrectaStr = "incorrecta"
+	}
+	falloStr := "fallos"
+	if failure == 1 {
+		falloStr = "fallo"
+	}
+	fmt.Printf("%d %s, %d %s, %d %s\n",
+		correct,
+		colors.Colorize(correctaStr, colors.Green),
+		incorrect,
+		colors.Colorize(incorrectaStr, colors.Yellow),
+		failure,
+		colors.Colorize(falloStr, colors.Red),
+	)
 }

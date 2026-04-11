@@ -1,6 +1,9 @@
 package colors
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type Color string
 
@@ -29,4 +32,9 @@ func Println(input string, color Color) {
 
 func Colorize(input string, color Color) string {
 	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", color, input)
+}
+
+func Printf(color Color, format string, a ...any) (n int, err error) {
+	colorized := Colorize(format, color)
+	return fmt.Fprintf(os.Stdout, colorized, a...)
 }
