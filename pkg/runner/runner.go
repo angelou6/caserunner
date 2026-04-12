@@ -3,8 +3,8 @@ package runner
 import (
 	"bufio"
 	"bytes"
-	"caserunner/internal/colors"
-	"caserunner/internal/parser"
+	"caserunner/pkg/colors"
+	"caserunner/pkg/parser"
 	"errors"
 	"fmt"
 	"os/exec"

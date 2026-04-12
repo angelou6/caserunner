@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"caserunner/internal/colors"
+	"caserunner/pkg/colors"
 	"errors"
 	"fmt"
 	"regexp"

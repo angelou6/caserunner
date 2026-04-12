@@ -1,8 +1,8 @@
 package main
 
 import (
-	"caserunner/internal/parser"
-	"caserunner/internal/runner"
+	"caserunner/pkg/parser"
+	"caserunner/pkg/runner"
 	"flag"
 	"fmt"
 	"os"
