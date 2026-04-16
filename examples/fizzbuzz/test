@@ -1,0 +1,25 @@
+exec: python $code
+
+--
+input:
+3
+
+output:
+Fizz
+--
+
+--
+input:
+5
+
+output:
+Buzz
+--
+
+--
+output:
+FizzBuzz
+
+input:
+15
+--

@@ -1,0 +1,28 @@
+problema original: https://omegaup.com/arena/problem/Imprimiendo-enteros-por-paridad/
+
+exec: python $code
+time-limit: 1s
+
+--
+input:
+5
+2 5 9 6 1
+0
+
+output:
+\
+\
+2 6
+--
+
+--
+input:
+5
+2 5 9 6 1
+1
+
+output:
+\
+\
+5 9 1
+--
