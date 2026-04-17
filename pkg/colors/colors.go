@@ -22,19 +22,19 @@ func RGB(red, green, blue int) Color {
 	return Color(fmt.Sprintf("38;2;%d;%d;%d", red, green, blue))
 }
 
-func Print(input string, color Color) {
+func Print(color Color, input string) {
 	fmt.Printf("\x1b[%sm%s\x1b[0m", color, input)
 }
 
-func Println(input string, color Color) {
-	Print(input+"\n", color)
+func Println(color Color, input string) {
+	Print(color, input+"\n")
 }
 
-func Colorize(input string, color Color) string {
+func Colorize(color Color, input string) string {
 	return fmt.Sprintf("\x1b[%sm%s\x1b[0m", color, input)
 }
 
 func Printf(color Color, format string, a ...any) (n int, err error) {
-	colorized := Colorize(format, color)
+	colorized := Colorize(color, format)
 	return fmt.Fprintf(os.Stdout, colorized, a...)
 }

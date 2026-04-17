@@ -176,12 +176,12 @@ Fizz
 		t.Errorf("Got error: %v", err)
 	}
 
-	if suite.exec != "python main.py" {
-		t.Errorf("Wrong exec. Expected 'python main.py', got %s", suite.exec)
+	if suite.Exec != "python main.py" {
+		t.Errorf("Wrong exec. Expected 'python main.py', got %s", suite.Exec)
 	}
 
-	if suite.timeLimit != 3*time.Millisecond {
-		t.Errorf("Wrong time limit. Expected '3ms', got %v", suite.timeLimit)
+	if suite.TimeLimit != 3*time.Millisecond {
+		t.Errorf("Wrong time limit. Expected '3ms', got %v", suite.TimeLimit)
 	}
 }
 
@@ -229,8 +229,8 @@ Fizz
 	if err != nil {
 		t.Errorf("Got unexpected error: %v", err)
 	}
-	if suite.timeLimit != time.Duration(math.MaxInt64) {
-		t.Errorf("Expected infinite time limit, got %v", suite.timeLimit)
+	if suite.TimeLimit != time.Duration(math.MaxInt64) {
+		t.Errorf("Expected infinite time limit, got %v", suite.TimeLimit)
 	}
 
 	missingExec := `

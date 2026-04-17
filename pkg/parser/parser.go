@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"caserunner/pkg/testcase"
 	"fmt"
 	"math"
 	"regexp"
@@ -8,29 +9,53 @@ import (
 	"time"
 )
 
-type TestSuite struct {
-	exec      string
-	timeLimit time.Duration
-	Cases     []TestCase
-}
-
-func NewTestSuite(exec string, limit time.Duration) TestSuite {
-	return TestSuite{exec: exec, timeLimit: limit}
-}
-
 func firstRegexMatch(regex, input string) (string, error) {
 	r := regexp.MustCompile(regex)
 	if m := r.FindStringSubmatch(input); m != nil {
 		return m[1], nil
 	}
-	return "", fmt.Errorf("Regex: %s not found in %s", regex, input)
+	return "", fmt.Errorf("%s no fué encontrado en %s", regex, input)
 }
 
-func ParseFile(input, fileLocation string) (TestSuite, error) {
+func findSingleIndex(input []string, find string) (int, error) {
+	var found []int
+	for i, line := range input {
+		if line == find {
+			found = append(found, i)
+		}
+	}
+
+	if len(found) == 1 {
+		return found[0], nil
+	} else if len(found) > 1 {
+		return 0, fmt.Errorf("Más de un '%s' fué encontrado", find)
+	}
+	return 0, fmt.Errorf("No se pudo encontrar %s", find)
+}
+
+func ParseTestCase(caseString string) (testcase.TestCase, error) {
+	lines := strings.Split(caseString, "\n")
+	inIdx, err := findSingleIndex(lines, string(testcase.Input))
+	if err != nil {
+		return testcase.TestCase{}, err
+	}
+	outIdx, err := findSingleIndex(lines, string(testcase.Output))
+	if err != nil {
+		return testcase.TestCase{}, err
+	}
+
+	tc := testcase.TestCase{}
+	tc.AppendToCase(inIdx, lines, testcase.Input)
+	tc.AppendToCase(outIdx, lines, testcase.Output)
+
+	return tc, nil
+}
+
+func ParseFile(input, fileLocation string) (testcase.TestSuite, error) {
 	exec, err := firstRegexMatch(`exec:\s*(.+)`, input)
 	exec = strings.ReplaceAll(exec, "$code", fileLocation)
 	if err != nil {
-		return TestSuite{}, err
+		return testcase.TestSuite{}, err
 	}
 
 	var limit time.Duration
@@ -40,16 +65,16 @@ func ParseFile(input, fileLocation string) (TestSuite, error) {
 	} else {
 		limit, err = time.ParseDuration(timeLimit)
 		if err != nil {
-			return TestSuite{}, err
+			return testcase.TestSuite{}, err
 		}
 	}
 
 	cases := regexp.MustCompile(`(?s)--\n(.*?)\n--`).FindAllStringSubmatch(input, -1)
-	suite := NewTestSuite(exec, limit)
+	suite := testcase.TestSuite{Exec: exec, TimeLimit: limit}
 	for _, c := range cases {
 		tc, err := ParseTestCase(c[1])
 		if err != nil {
-			return TestSuite{}, err
+			return testcase.TestSuite{}, err
 		}
 
 		suite.Cases = append(suite.Cases, tc)
