@@ -25,6 +25,7 @@ caserunner [flags] <archivo-de-prueba> <codigo>
 |---|---|
 | `-verbose` | Muestra el input y output completo de cada prueba |
 | `-halt` | Detiene la ejecución al encontrar el primer error |
+| `-silent` | Solo muestra los resultados finales |
 
 **Ejemplo:**
 

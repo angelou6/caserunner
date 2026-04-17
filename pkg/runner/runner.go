@@ -70,14 +70,14 @@ func process(program string, inputs []string, timeLimit time.Duration) ([]string
 	return output, stderr.String(), nil
 }
 
-func RunSuite(suite testcase.TestSuite, verbose, halt bool) Result {
+func RunSuite(suite testcase.TestSuite, verbose, halt, silent bool) Result {
 	var res Result
 	for i, c := range suite.Cases {
 		r, stderr, err := process(suite.Exec, c.Input, suite.TimeLimit)
 		if err != nil {
 			res.failed++
-			colors.Printf(colors.Red, "Caso %d falló: %s\n", i+1, err)
-			if stderr != "" {
+			if stderr != "" && !silent {
+				colors.Printf(colors.Red, "Caso %d falló: %s\n", i+1, err)
 				fmt.Print(stderr)
 				if !strings.HasSuffix(stderr, "\n") {
 					fmt.Println()
@@ -91,14 +91,16 @@ func RunSuite(suite testcase.TestSuite, verbose, halt bool) Result {
 
 		if slices.Equal(r, c.Output) {
 			res.success++
-			if verbose {
+			if verbose && !silent {
 				colors.Printf(colors.Green, "Caso %d correcto:\n", i+1)
 				fmt.Printf("Se esperaba %q, se obtuvo %q\n", r, c.Output)
 			}
 		} else {
 			res.incorrect++
-			colors.Printf(colors.Yellow, "Caso %d incorrecto:\n", i+1)
-			fmt.Printf("Se esperaba %q, se obtuvo %q\n", r, c.Output)
+			if !silent {
+				colors.Printf(colors.Yellow, "Caso %d incorrecto:\n", i+1)
+				fmt.Printf("Se esperaba %q, se obtuvo %q\n", r, c.Output)
+			}
 			if halt {
 				break
 			}

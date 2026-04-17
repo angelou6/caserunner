@@ -11,7 +11,13 @@ import (
 func main() {
 	verbose := flag.Bool("verbose", false, "Salida detallada")
 	halt := flag.Bool("halt", false, "Pruebas paran cuando se encuetra un error")
+	silent := flag.Bool("silent", false, "Salida silenciosa")
 	flag.Parse()
+
+	if len(os.Args) < 2 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	code := os.Args[len(os.Args)-1]
 	file, err := os.ReadFile(os.Args[len(os.Args)-2])
@@ -26,6 +32,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	res := runner.RunSuite(suite, *verbose, *halt)
+	res := runner.RunSuite(suite, *verbose, *halt, *silent)
 	res.PrintResults()
 }
