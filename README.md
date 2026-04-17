@@ -1,7 +1,5 @@
 # caserunner
 
-Herramienta para correr casos de prueba contra un programa. Diseñada para practicar problemas de programación competitiva.
-
 ## Compilación
 
 ```bash
