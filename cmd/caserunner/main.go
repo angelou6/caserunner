@@ -3,35 +3,29 @@ package main
 import (
 	"caserunner/pkg/parser"
 	"caserunner/pkg/runner"
+	"flag"
 	"fmt"
 	"os"
 )
 
 func main() {
-	input := `
-this is a test comment
-exec: python $code
---
-input:
-3
+	verbose := flag.Bool("verbose", false, "Salida detallada")
+	halt := flag.Bool("halt", false, "Pruebas paran cuando se encuetra un error")
+	flag.Parse()
 
-output:
-Fizz
---
-
---
-input:
-1
-
-output:
-1
---
-`
-	file, err := parser.ParseFile(input, os.Args[1])
+	code := os.Args[len(os.Args)-1]
+	file, err := os.ReadFile(os.Args[len(os.Args)-2])
 	if err != nil {
-		fmt.Println(err)
+		println("No se pudo leer las pruebas")
 		os.Exit(1)
 	}
-	res := runner.RunSuite(file)
+
+	suite, err := parser.ParseFile(string(file), code)
+	if err != nil {
+		fmt.Print(err)
+		os.Exit(1)
+	}
+
+	res := runner.RunSuite(suite, *verbose, *halt)
 	res.PrintResults()
 }

@@ -14,12 +14,6 @@ import (
 	"time"
 )
 
-var (
-	ErrTimeout     = errors.New("Programa excedió el tiempo limite")
-	ErrExited      = errors.New("Programa teminó con un error")
-	ErrStdinClosed = errors.New("Stdin se cerro inesperadamente")
-)
-
 func process(program string, inputs []string, timeLimit time.Duration) ([]string, string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeLimit)
 	defer cancel()
@@ -58,25 +52,25 @@ func process(program string, inputs []string, timeLimit time.Duration) ([]string
 	var output []string
 	scanner := bufio.NewScanner(stdout)
 	for scanner.Scan() {
-		output = append(output, scanner.Text())
+		output = append(output, strings.TrimSpace(scanner.Text()))
 	}
 
 	<-writeDone
 	waitErr := cmd.Wait()
 
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-		return output, stderr.String(), ErrTimeout
+		return output, stderr.String(), errors.New("Programa excedió el tiempo limite")
 	}
 	if waitErr != nil {
-		return output, stderr.String(), ErrExited
+		return output, stderr.String(), errors.New("Programa teminó con un error")
 	}
 	if stdinErr != nil {
-		return output, stderr.String(), ErrStdinClosed
+		return output, stderr.String(), errors.New("Stdin se cerro inesperadamente")
 	}
 	return output, stderr.String(), nil
 }
 
-func RunSuite(suite testcase.TestSuite) Result {
+func RunSuite(suite testcase.TestSuite, verbose, halt bool) Result {
 	var res Result
 	for i, c := range suite.Cases {
 		r, stderr, err := process(suite.Exec, c.Input, suite.TimeLimit)
@@ -89,13 +83,25 @@ func RunSuite(suite testcase.TestSuite) Result {
 					fmt.Println()
 				}
 			}
+			if halt {
+				break
+			}
 			continue
 		}
 
 		if slices.Equal(r, c.Output) {
 			res.success++
+			if verbose {
+				colors.Printf(colors.Green, "Caso %d correcto:\n", i+1)
+				fmt.Printf("Se esperaba %q, se obtuvo %q\n", r, c.Output)
+			}
 		} else {
 			res.incorrect++
+			colors.Printf(colors.Yellow, "Caso %d incorrecto:\n", i+1)
+			fmt.Printf("Se esperaba %q, se obtuvo %q\n", r, c.Output)
+			if halt {
+				break
+			}
 		}
 	}
 	return res

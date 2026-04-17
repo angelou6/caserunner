@@ -51,15 +51,15 @@ func ParseTestCase(caseString string) (testcase.TestCase, error) {
 	return tc, nil
 }
 
-func ParseFile(input, fileLocation string) (testcase.TestSuite, error) {
-	exec, err := firstRegexMatch(`exec:\s*(.+)`, input)
-	exec = strings.ReplaceAll(exec, "$code", fileLocation)
+func ParseFile(file, code string) (testcase.TestSuite, error) {
+	exec, err := firstRegexMatch(`exec:\s*(.+)`, file)
+	exec = strings.ReplaceAll(exec, "$code", code)
 	if err != nil {
 		return testcase.TestSuite{}, err
 	}
 
 	var limit time.Duration
-	timeLimit, err := firstRegexMatch(`time-limit:\s*(\S+)`, input)
+	timeLimit, err := firstRegexMatch(`time-limit:\s*(\S+)`, file)
 	if err != nil {
 		limit = time.Duration(math.MaxInt64)
 	} else {
@@ -69,7 +69,7 @@ func ParseFile(input, fileLocation string) (testcase.TestSuite, error) {
 		}
 	}
 
-	cases := regexp.MustCompile(`(?s)--\n(.*?)\n--`).FindAllStringSubmatch(input, -1)
+	cases := regexp.MustCompile(`(?s)--\n(.*?)\n--`).FindAllStringSubmatch(file, -1)
 	suite := testcase.TestSuite{Exec: exec, TimeLimit: limit}
 	for _, c := range cases {
 		tc, err := ParseTestCase(c[1])

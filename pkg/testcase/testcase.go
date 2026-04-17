@@ -27,6 +27,9 @@ func (t *TestCase) AppendToCase(start int, testcase []string, dir Direction) {
 		}
 
 		c = strings.ReplaceAll(c, `\`, "")
+		if c == "" {
+			continue
+		}
 		*insert = append(*insert, c)
 	}
 }
