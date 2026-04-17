@@ -1,7 +1,7 @@
 package runner
 
 import (
-	"caserunner/pkg/colors"
+	"caserunner/internal/colors"
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ type Result struct {
 	success, incorrect, failed uint16
 }
 
-func (r *Result) PrintResults() {
+func (r Result) PrintResults() {
 	fmt.Printf(
 		"%s: %d, %s: %d, %s: %d\n",
 		colors.Colorize(colors.Green, "Correctas"), r.success,

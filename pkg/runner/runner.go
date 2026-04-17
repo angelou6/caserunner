@@ -3,7 +3,7 @@ package runner
 import (
 	"bufio"
 	"bytes"
-	"caserunner/pkg/colors"
+	"caserunner/internal/colors"
 	"caserunner/pkg/testcase"
 	"context"
 	"errors"

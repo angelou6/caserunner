@@ -1,6 +1,7 @@
 package testcase
 
 import (
+	"caserunner/internal/direction"
 	"strings"
 )
 
@@ -12,9 +13,9 @@ func NewTestCase(input, output []string) TestCase {
 	return TestCase{Input: input, Output: output}
 }
 
-func (t *TestCase) AppendToCase(start int, testcase []string, dir Direction) {
+func (t *TestCase) AppendToCase(start int, testcase []string, dir direction.Direction) {
 	insert := &t.Input
-	if dir == Output {
+	if dir == direction.Output {
 		insert = &t.Output
 	}
 
@@ -22,7 +23,7 @@ func (t *TestCase) AppendToCase(start int, testcase []string, dir Direction) {
 		switch c {
 		case string(dir), "":
 			continue
-		case string(dir.oposite()):
+		case string(dir.Oposite()):
 			return
 		}
 

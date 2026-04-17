@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"caserunner/internal/direction"
 	"caserunner/pkg/testcase"
 	"fmt"
 	"math"
@@ -35,18 +36,18 @@ func findSingleIndex(input []string, find string) (int, error) {
 
 func ParseTestCase(caseString string) (testcase.TestCase, error) {
 	lines := strings.Split(caseString, "\n")
-	inIdx, err := findSingleIndex(lines, string(testcase.Input))
+	inIdx, err := findSingleIndex(lines, string(direction.Input))
 	if err != nil {
 		return testcase.TestCase{}, err
 	}
-	outIdx, err := findSingleIndex(lines, string(testcase.Output))
+	outIdx, err := findSingleIndex(lines, string(direction.Output))
 	if err != nil {
 		return testcase.TestCase{}, err
 	}
 
 	tc := testcase.TestCase{}
-	tc.AppendToCase(inIdx, lines, testcase.Input)
-	tc.AppendToCase(outIdx, lines, testcase.Output)
+	tc.AppendToCase(inIdx, lines, direction.Input)
+	tc.AppendToCase(outIdx, lines, direction.Output)
 
 	return tc, nil
 }

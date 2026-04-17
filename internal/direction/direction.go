@@ -1,4 +1,4 @@
-package testcase
+package direction
 
 type Direction string
 
@@ -7,7 +7,7 @@ const (
 	Output Direction = "output:"
 )
 
-func (d Direction) oposite() Direction {
+func (d Direction) Oposite() Direction {
 	if d == Input {
 		return Output
 	}
